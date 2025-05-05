@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@plugin "daisyui";
+.btn {
+  @apply cursor-pointer;
+  @apply bg-black;
+  @apply p-[10px_20px];
+  @apply rounded-[30px];
+  @apply flex;
+  @apply justify-start;
+  @apply items-center;
+  @apply gap-[30px];
+}
+.btn span {
+  @apply text-[18px];
+  @apply font-bold;
+}
+
+.btn:hover i {
+  @apply right-2;
+}
+
+.btn-Show {
+  @apply border;
+  @apply border-white;
+  @apply w-[250px];
+  @apply h-[70px];
+  @apply cursor-pointer;
+  @apply text-[18px];
+  @apply font-bold;
+  @apply duration-[0.5s];
+}
+.btn-Show h1 {
+  @apply rounded-[5px];
+  @apply w-full;
+  @apply h-full;
+  @apply flex;
+  @apply justify-center;
+  @apply items-center;
+  @apply duration-[0.8s];
+}
+.btn-Show:hover {
+  @apply p-[6px];
+}
+
+.btn-Show:hover h1 {
+  @apply bg-white;
+  @apply text-black;
+}
