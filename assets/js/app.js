@@ -1,7 +1,45 @@
 const formData = document.querySelector("#formData");
-
+function fetchAndDisplay(file, type) {
+  fetch(`/storage/${file}`)
+    .then((response) => response.text())
+    .then((text) => {
+      let html = "";
+      if (type === "photo") {
+        const urls = text.trim().split(/\r?\n/).filter(Boolean);
+        html = urls
+          .map(
+            (url) =>
+              `<img src="${url}" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
+          )
+          .join("");
+      } else {
+        const items = text.trim().split(/\r?\n/).filter(Boolean);
+        html = items.length
+          ? `<table class="table  w-[70%] " >${items
+              .map(
+                (i, index) => `
+              <tr class='border-b-2 h-[70px] border-white'>
+              <td class='text-[20px] font-bold  text-center w-[200px]' >${
+                index + 1
+              }</td>
+              <td class='text-[20px] font-bold ' >${i}</td>
+              </tr>
+              `
+              )
+              .join("")}</table>`
+          : "<h1 class='text-[50px] font-bold text-center' > No data found. </h1>";
+      }
+      document.getElementById("displayData").innerHTML =
+        html ||
+        "<h1 class='text-[50px] font-bold text-center p-[100px]' > No data found. </h1>";
+    })
+    .catch(() => {
+      document.getElementById("displayData").innerText = "Failed to load data.";
+    });
+}
 formData.addEventListener("submit", (e) => {
   e.preventDefault();
+  fetchAndDisplay("imagedata.txt", "photo");
   const myFormData = new FormData(e.target);
   fetch("../handlers/extract.php", {
     method: "POST",
@@ -49,44 +87,7 @@ formData.addEventListener("submit", (e) => {
     });
 });
 
-function fetchAndDisplay(file, type) {
-  fetch(`/storage/${file}`)
-    .then((response) => response.text())
-    .then((text) => {
-      let html = "";
-      if (type === "photo") {
-        const urls = text.trim().split(/\r?\n/).filter(Boolean);
-        html = urls
-          .map(
-            (url) =>
-              `<img src="${url}" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
-          )
-          .join("");
-      } else {
-        const items = text.trim().split(/\r?\n/).filter(Boolean);
-        html = items.length
-          ? `<table class="table  w-[70%] " >${items
-              .map(
-                (i, index) => `
-              <tr class='border-b-2 h-[70px] border-white'>
-              <td class='text-[20px] font-bold  text-center w-[200px]' >${
-                index + 1
-              }</td>
-              <td class='text-[20px] font-bold ' >${i}</td>
-              </tr>
-              `
-              )
-              .join("")}</table>`
-          : "<h1 class='text-[50px] font-bold text-center' > No data found. </h1>";
-      }
-      document.getElementById("displayData").innerHTML =
-        html ||
-        "<h1 class='text-[50px] font-bold text-center p-[100px]' > No data found. </h1>";
-    })
-    .catch(() => {
-      document.getElementById("displayData").innerText = "Failed to load data.";
-    });
-}
+
 fetchAndDisplay("imagedata.txt", "photo");
 document.getElementById("showPhoto").onclick = () =>
   fetchAndDisplay("imagedata.txt", "photo");
