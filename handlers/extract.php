@@ -8,7 +8,16 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
 
-    $url = isset($_POST['url']) ? filter_var(trim($_POST['url']), FILTER_VALIDATE_URL):false;
+    // Support both form-data and JSON input
+    $input = file_get_contents('php://input');
+    $data = [];
+    if (!empty($input) && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+        $data = json_decode($input, true);
+    }
+    $url = isset($_POST['url']) ? filter_var(trim($_POST['url']), FILTER_VALIDATE_URL) : false;
+    if (!$url && isset($data['url'])) {
+        $url = filter_var(trim($data['url']), FILTER_VALIDATE_URL);
+    }
 
     if (!$url) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid URL']);

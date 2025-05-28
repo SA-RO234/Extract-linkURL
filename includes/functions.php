@@ -43,12 +43,25 @@ function extractImages($content)
         $imageUrls = array_merge($imageUrls, $sourceMatches[1]);
     }
 
+    // Extract image URLs from <a href="...">
+    preg_match_all('/<a[^>]+href=["\']([^"\'>]+\.(?:jpg|jpeg|png|webp)(?:\?[^"\'>]*)?)["\']/i', $content, $aMatches);
+    if (!empty($aMatches[1])) {
+        $imageUrls = array_merge($imageUrls, $aMatches[1]);
+    }
+
+    // Also match direct image URLs in plain text
+    preg_match_all('/https?:\/\/[^\s"\'<>]+\.(?:jpg|jpeg|png|webp)(\?[^\s"\'<>]*)?/i', $content, $plainMatches);
+    if (!empty($plainMatches[0])) {
+        $imageUrls = array_merge($imageUrls, $plainMatches[0]);
+    }
+
     $imageUrls = array_filter($imageUrls, function ($url) {
         // Allow image URLs with query parameters after the extension (e.g., ?format=webp)
-        return preg_match('/^https:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url);
+        return preg_match('/^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url);
     });
 
-    return array_unique($imageUrls);
+    // Ensure $imageUrls is always an array
+    return array_unique(array_filter($imageUrls ?: []));
 }
 
 function saveData($data)
