@@ -28,16 +28,19 @@ function extractPhones($content)
 function extractImages($content)
 {
     $imageUrls = [];
-    // Match <img src>, <source srcset>, direct URLs (absolute/relative), and background images
+    // Match <img src>, <source srcset>, and background images (accept any URL)
     preg_match_all('/<img[^>]+src=["\']([^"\'>]+)["\']|<source[^>]+srcset=["\']([^"\'>]+)["\']|background-image\s*:\s*url\(["\']?([^"\')]+)["\']?\)/i', $content, $matches);
     $allUrls = array_merge($matches[1] ?? [], $matches[2] ?? [], $matches[3] ?? []);
     foreach ($allUrls as $url) {
-        if ($url && preg_match('/\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url)) {
+        if ($url && (
+            preg_match('/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i', $url) ||
+            preg_match('/([?&](format|type|ext)=(jpg|jpeg|png|webp|gif|svg))/i', $url)
+        )) {
             $imageUrls[$url] = true;
         }
     }
     // Also match direct image URLs in plain text (absolute and relative)
-    preg_match_all('/((https?:\/\/|\/)[^\s"\'<>]+\.(jpg|jpeg|png|webp)(\?[^\s"\'<>]*)?)/i', $content, $plainMatches);
+    preg_match_all('/((https?:\/\/|\/)[^\s"\'<>]+(?:(?:\.(jpg|jpeg|png|webp|gif|svg))|(?:[?&](?:format|type|ext)=(?:jpg|jpeg|png|webp|gif|svg)))(\?[^\s"\'<>]*)?)/i', $content, $plainMatches);
     foreach ($plainMatches[1] ?? [] as $url) {
         if ($url) {
             $imageUrls[$url] = true;

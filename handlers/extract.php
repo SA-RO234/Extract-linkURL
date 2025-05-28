@@ -24,6 +24,18 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         exit;
     }
 
+    // Check if the URL is a direct image file
+    if (preg_match('/\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url)) {
+        $result = [
+            'emails' => [],
+            'images' => [$url],
+            'phones' => []
+        ];
+        saveData($result);
+        echo json_encode(['status' => 'success', 'data' => $result]);
+        exit;
+    }
+
     $html = file_get_contents($url);
     if ($html === false) {
         echo json_encode(['status' => 'error', 'message' => 'Failed to fetch content']);
