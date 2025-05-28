@@ -44,7 +44,8 @@ function extractImages($content)
     }
 
     $imageUrls = array_filter($imageUrls, function ($url) {
-        return preg_match('/^https:\/\/.+\.(jpg|jpeg|png|webp)$/i', $url);
+        // Allow image URLs with query parameters after the extension (e.g., ?format=webp)
+        return preg_match('/^https:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url);
     });
 
     return array_unique($imageUrls);
