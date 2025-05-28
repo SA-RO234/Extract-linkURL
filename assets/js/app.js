@@ -59,7 +59,7 @@ function fetchAndDisplay(file, type) {
         html = urls
           .map(
             (url) =>
-              `<img src="${url}" alt="Image" class="inline-block m-[20px] border-2 border-black justify-center cursor-pointer" />`
+              `<img src="${url}" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
           )
           .join("");
       } else {
@@ -68,7 +68,7 @@ function fetchAndDisplay(file, type) {
           ? `<table class="table  w-[70%] " >${items
               .map(
                 (i, index) => `
-              <tr class='border-b-2 h-[70px] border-black'>
+              <tr class='border-b-2 h-[70px] border-white'>
               <td class='text-[20px] font-bold  text-center w-[200px]' >${
                 index + 1
               }</td>
