@@ -1,4 +1,57 @@
 const formData = document.querySelector("#formData");
+
+formData.addEventListener("submit", (e) => {
+  e.preventDefault();
+  fetchAndDisplay("imagedata.txt", "photo");
+  const myFormData = new FormData(e.target);
+  fetch("../handlers/extract.php", {
+    method: "POST",
+    body: myFormData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        const oldAlert = document.getElementById("success-alert");
+        if (oldAlert) oldAlert.remove();
+        // Create alert div
+        const alertDiv = document.createElement("div");
+        alertDiv.id = "success-alert";
+        alertDiv.setAttribute("role", "alert");
+        alertDiv.className =
+          "alert alert-success absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
+        alertDiv.innerHTML = `
+          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 shrink-0 stroke-current\" fill=\"none\" viewBox=\"0 0 24 24\">
+            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" />
+          </svg>
+          <span>Your extract has been completed successfully!</span>
+        `;
+        // Insert alert at the top of the form
+        formData.parentNode.insertBefore(alertDiv, formData);
+        setTimeout(() => alertDiv.remove(), 3500);
+        // Refresh the displayed data immediately after success
+        fetchAndDisplay("imagedata.txt", "photo");
+      } else {
+        const oldAlert = document.getElementById("error-alert");
+        if (oldAlert) oldAlert.remove();
+        // Create alert div
+        const alertDiv = document.createElement("div");
+        alertDiv.id = "error-alert";
+        alertDiv.setAttribute("role", "alert");
+        alertDiv.className =
+          "alert alert-error absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
+        alertDiv.innerHTML = `
+          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 shrink-0 stroke-current\" fill=\"none\" viewBox=\"0 0 24 24\">
+            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" />
+          </svg>
+          <span>Invalid your link URL, Please try againt</span>
+        `;
+        // Insert alert at the top of the form
+        formData.parentNode.insertBefore(alertDiv, formData);
+        setTimeout(() => alertDiv.remove(), 3500);
+      }
+    });
+});
+
 function fetchAndDisplay(file, type) {
   fetch(`/storage/${file}`)
     .then((response) => response.text())
@@ -37,57 +90,6 @@ function fetchAndDisplay(file, type) {
       document.getElementById("displayData").innerText = "Failed to load data.";
     });
 }
-formData.addEventListener("submit", (e) => {
-  e.preventDefault();
-  fetchAndDisplay("imagedata.txt", "photo");
-  const myFormData = new FormData(e.target);
-  fetch("../handlers/extract.php", {
-    method: "POST",
-    body: myFormData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.status === "success") {
-   
-        const oldAlert = document.getElementById("success-alert");
-        if (oldAlert) oldAlert.remove();
-        // Create alert div
-        const alertDiv = document.createElement("div");
-        alertDiv.id = "success-alert";
-        alertDiv.setAttribute("role", "alert");
-        alertDiv.className = "alert alert-success absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
-        alertDiv.innerHTML = `
-          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 shrink-0 stroke-current\" fill=\"none\" viewBox=\"0 0 24 24\">
-            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" />
-          </svg>
-          <span>Your extract has been completed successfully!</span>
-        `;
-        // Insert alert at the top of the form
-        formData.parentNode.insertBefore(alertDiv, formData);
-        setTimeout(() => alertDiv.remove(), 3500);
-      } else {
-         const oldAlert = document.getElementById("error-alert");
-         if (oldAlert) oldAlert.remove();
-         // Create alert div
-         const alertDiv = document.createElement("div");
-         alertDiv.id = "error-alert";
-         alertDiv.setAttribute("role", "alert");
-         alertDiv.className =
-           "alert alert-error absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
-         alertDiv.innerHTML = `
-          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 shrink-0 stroke-current\" fill=\"none\" viewBox=\"0 0 24 24\">
-            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" />
-          </svg>
-          <span>Invalid your link URL, Please try againt</span>
-        `;
-         // Insert alert at the top of the form
-         formData.parentNode.insertBefore(alertDiv, formData);
-         setTimeout(() => alertDiv.remove(), 3500);
-      }
-    });
-});
-
-
 fetchAndDisplay("imagedata.txt", "photo");
 document.getElementById("showPhoto").onclick = () =>
   fetchAndDisplay("imagedata.txt", "photo");
