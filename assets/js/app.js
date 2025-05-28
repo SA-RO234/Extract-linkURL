@@ -29,7 +29,8 @@ formData.addEventListener("submit", (e) => {
         formData.parentNode.insertBefore(alertDiv, formData);
         setTimeout(() => alertDiv.remove(), 3500);
         // Refresh the displayed data immediately after success
-        fetchAndDisplay("imagedata.txt", "photo");
+        fetchAndDisplay.cache["imagedata.txt"] = undefined;
+        fetchAndDisplay("imagedata.txt", "photo-refresh");
       } else {
         const oldAlert = document.getElementById("error-alert");
         if (oldAlert) oldAlert.remove();
@@ -53,47 +54,83 @@ formData.addEventListener("submit", (e) => {
 });
 
 function fetchAndDisplay(file, type) {
+  // Simple in-memory cache
+  if (!fetchAndDisplay.cache) fetchAndDisplay.cache = {};
+  const cache = fetchAndDisplay.cache;
+  // If cached and not photo refresh, use cache
+  if (cache[file] && type !== "photo-refresh") {
+    renderDisplay(cache[file], type);
+    return;
+  }
   fetch(`/storage/${file}`)
     .then((response) => response.text())
     .then((text) => {
-      let html = "";
-      if (type === "photo") {
-        const urls = text.trim().split(/\r?\n/).filter(Boolean);
-        html = urls
-          .map(
-            (url) =>
-              `<img src="${url}" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
-          )
-          .join("");
-      } else {
-        const items = text.trim().split(/\r?\n/).filter(Boolean);
-        html = items.length
-          ? `<table class="table  w-[70%] " >${items
-              .map(
-                (i, index) => `
-              <tr class='border-b-2 h-[70px] border-white'>
-              <td class='text-[20px] font-bold  text-center w-[200px]' >${
-                index + 1
-              }</td>
-              <td class='text-[20px] font-bold ' >${i}</td>
-              </tr>
-              `
-              )
-              .join("")}</table>`
-          : "<h1 class='text-[50px] font-bold text-center' > No data found. </h1>";
-      }
-      document.getElementById("displayData").innerHTML =
-        html ||
-        "<h1 class='text-[50px] font-bold text-center p-[100px]' > No data found. </h1>";
+      cache[file] = text;
+      renderDisplay(text, type);
     })
     .catch(() => {
       document.getElementById("displayData").innerText = "Failed to load data.";
     });
 }
+
+function renderDisplay(text, type) {
+  let html = "";
+  if (type === "photo" || type === "photo-refresh") {
+    const urls = text.trim().split(/\r?\n/).filter(Boolean);
+    html = urls
+      .map(
+        (url) =>
+          `<img src="${url}" loading="lazy" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
+      )
+      .join("");
+  } else {
+    const items = text.trim().split(/\r?\n/).filter(Boolean);
+    html = items.length
+      ? `<table class="table  w-[70%] " >${items
+          .map(
+            (i, index) => `
+          <tr class='border-b-2 h-[70px] border-white'>
+          <td class='text-[20px] font-bold  text-center w-[200px]' >${
+            index + 1
+          }</td>
+          <td class='text-[20px] font-bold ' >${i}</td>
+          </tr>
+          `
+          )
+          .join("")}</table>`
+      : "<h1 class='text-[50px] font-bold text-center' > No data found. </h1>";
+  }
+  document.getElementById("displayData").innerHTML =
+    html ||
+    "<h1 class='text-[50px] font-bold text-center p-[100px]' > No data found. </h1>";
+}
+
+// Debounce utility
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// Debounced event handlers
+const debouncedShowPhoto = debounce(
+  () => fetchAndDisplay("imagedata.txt", "photo"),
+  300
+);
+const debouncedShowEmail = debounce(
+  () => fetchAndDisplay("emaildata.txt", "email"),
+  300
+);
+const debouncedShowPhone = debounce(
+  () => fetchAndDisplay("phonedata.txt", "phone"),
+  300
+);
+
+document.getElementById("showPhoto").onclick = debouncedShowPhoto;
+document.getElementById("showEmail").onclick = debouncedShowEmail;
+document.getElementById("showPhone").onclick = debouncedShowPhone;
+
+// Initial load
 fetchAndDisplay("imagedata.txt", "photo");
-document.getElementById("showPhoto").onclick = () =>
-  fetchAndDisplay("imagedata.txt", "photo");
-document.getElementById("showEmail").onclick = () =>
-  fetchAndDisplay("emaildata.txt", "email");
-document.getElementById("showPhone").onclick = () =>
-  fetchAndDisplay("phonedata.txt", "phone");

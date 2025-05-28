@@ -28,40 +28,22 @@ function extractPhones($content)
 function extractImages($content)
 {
     $imageUrls = [];
-    preg_match_all('/<img[^>]+src=["\']([^"\'>]+)["\']/i', $content, $imgMatches);
-    if (!empty($imgMatches[1])) {
-        $imageUrls = array_merge($imageUrls, $imgMatches[1]);
+    // Match <img src>, <source srcset>, direct URLs (absolute/relative), and background images
+    preg_match_all('/<img[^>]+src=["\']([^"\'>]+)["\']|<source[^>]+srcset=["\']([^"\'>]+)["\']|background-image\s*:\s*url\(["\']?([^"\')]+)["\']?\)/i', $content, $matches);
+    $allUrls = array_merge($matches[1] ?? [], $matches[2] ?? [], $matches[3] ?? []);
+    foreach ($allUrls as $url) {
+        if ($url && preg_match('/\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url)) {
+            $imageUrls[$url] = true;
+        }
     }
-
-    preg_match_all('/background-image\s*:\s*url\(["\']?([^"\')]+)["\']?\)/i', $content, $bgMatches);
-    if (!empty($bgMatches[1])) {
-        $imageUrls = array_merge($imageUrls, $bgMatches[1]);
+    // Also match direct image URLs in plain text (absolute and relative)
+    preg_match_all('/((https?:\/\/|\/)[^\s"\'<>]+\.(jpg|jpeg|png|webp)(\?[^\s"\'<>]*)?)/i', $content, $plainMatches);
+    foreach ($plainMatches[1] ?? [] as $url) {
+        if ($url) {
+            $imageUrls[$url] = true;
+        }
     }
-
-    preg_match_all('/<source[^>]+srcset=["\']([^"\'>]+)["\']/i', $content, $sourceMatches);
-    if (!empty($sourceMatches[1])) {
-        $imageUrls = array_merge($imageUrls, $sourceMatches[1]);
-    }
-
-    // Extract image URLs from <a href="...">
-    preg_match_all('/<a[^>]+href=["\']([^"\'>]+\.(?:jpg|jpeg|png|webp)(?:\?[^"\'>]*)?)["\']/i', $content, $aMatches);
-    if (!empty($aMatches[1])) {
-        $imageUrls = array_merge($imageUrls, $aMatches[1]);
-    }
-
-    // Also match direct image URLs in plain text
-    preg_match_all('/https?:\/\/[^\s"\'<>]+\.(?:jpg|jpeg|png|webp)(\?[^\s"\'<>]*)?/i', $content, $plainMatches);
-    if (!empty($plainMatches[0])) {
-        $imageUrls = array_merge($imageUrls, $plainMatches[0]);
-    }
-
-    $imageUrls = array_filter($imageUrls, function ($url) {
-        // Allow image URLs with query parameters after the extension (e.g., ?format=webp)
-        return preg_match('/^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i', $url);
-    });
-
-    // Ensure $imageUrls is always an array
-    return array_unique(array_filter($imageUrls ?: []));
+    return array_keys($imageUrls);
 }
 
 function saveData($data)
