@@ -81,7 +81,13 @@ function saveData($data)
             file_put_contents($file, implode(PHP_EOL, $toAdd) . PHP_EOL, FILE_APPEND);
         }
     }
+
+    // Clean image URLs before saving
+    $cleanImages = array_map(function ($url) {
+        return rtrim($url, ';)');
+    }, $data['images']);
+
     appendUnique(STORAGE_PATH . 'emaildata.txt', $data['emails']);
-    appendUnique(STORAGE_PATH . 'imagedata.txt', $data['images']);
+    appendUnique(STORAGE_PATH . 'imagedata.txt', $cleanImages);
     appendUnique(STORAGE_PATH . 'phonedata.txt', $data['phones']);
 }

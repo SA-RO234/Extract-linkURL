@@ -31,6 +31,8 @@ formData.addEventListener("submit", (e) => {
         // Refresh the displayed data immediately after success
         fetchAndDisplay.cache["imagedata.txt"] = undefined;
         fetchAndDisplay("imagedata.txt", "photo-refresh");
+      } else if (data.status === "blocked") {
+        showBlockedAlert(); // Show blocked message
       } else {
         const oldAlert = document.getElementById("error-alert");
         if (oldAlert) oldAlert.remove();
@@ -80,16 +82,24 @@ function renderDisplay(text, type) {
     html = urls
       .map(
         (url) =>
-          `<img src="${url}" loading="lazy" alt="Image" class="inline-block border border-white m-[20px]  justify-center cursor-pointer" />`
+          `
+        <div class="relative group flex justify-center items-center m-[20px]">
+         <div class="overlay group-hover:h-full h-0 w-0 group-hover:w-full absolute  duration-[0.7s] bg-[rgba(0,0,0,0.81)]"></div>
+                <img src="${url}" loading="lazy" alt="Image" class="border border-white m-[20px] cursor-pointer" />
+                <button type="button" id="displayData" class ="border opacity-0 group-hover:opacity-100 duration-[0.7s] active:border active:border-white border-black absolute cursor-pointer text-2xl font-bold  p-[10px_10px] bg-black " >Copy</button>
+        </div>
+        `
       )
       .join("");
   } else {
     const items = text.trim().split(/\r?\n/).filter(Boolean);
     html = items.length
-      ? `<table class="table  w-[70%] " >${items
+      ? `
+      <div class="overflow-x-auto w-full">
+      <table class="table  w-[70%] m-auto" >${items
           .map(
             (i, index) => `
-          <tr class='border-b-2 h-[70px] border-white'>
+          <tr class='border-b-2  h-[70px] overflow-scroll border-white'>
           <td class='text-[20px] font-bold  text-center w-[200px]' >${
             index + 1
           }</td>
@@ -97,13 +107,33 @@ function renderDisplay(text, type) {
           </tr>
           `
           )
-          .join("")}</table>`
-      : "<h1 class='text-[50px] font-bold text-center' > No data found. </h1>";
+          .join("")}
+          </table>
+          </div>
+          `
+      : "<h1 class='md:text-[50px] text-[25px] font-bold text-center' > No data found. </h1>";
   }
   document.getElementById("displayData").innerHTML =
     html ||
-    "<h1 class='text-[50px] font-bold text-center p-[100px]' > No data found. </h1>";
+    "<h1 class='md:text-[50px] text-[25px] font-bold text-center p-[100px]' > No data found. </h1>";
 }
+
+// Delegate copy button click for image URLs
+document.getElementById("displayData").addEventListener("click", function (e) {
+  if (
+    e.target &&
+    e.target.tagName === "BUTTON" &&
+    e.target.textContent.trim() === "Copy"
+  ) {
+    const img = e.target.parentElement.querySelector("img");
+    if (img && img.src) {
+      navigator.clipboard.writeText(img.src).then(() => {
+        e.target.textContent = "Copied!";
+        setTimeout(() => (e.target.textContent = "Copy"), 1200);
+      });
+    }
+  }
+});
 
 // Debounce utility
 function debounce(fn, delay) {
@@ -134,3 +164,59 @@ document.getElementById("showPhone").onclick = debouncedShowPhone;
 
 // Initial load
 fetchAndDisplay("imagedata.txt", "photo");
+
+// Add this function to show blocked alert
+function showBlockedAlert() {
+  const oldAlert = document.getElementById("blocked-alert");
+  if (oldAlert) oldAlert.remove();
+  const alertDiv = document.createElement("div");
+  alertDiv.id = "blocked-alert";
+  alertDiv.setAttribute("role", "alert");
+  alertDiv.className =
+    "alert alert-error absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
+  alertDiv.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+    <span>Link ​is Blocked !</span>
+  `;
+  formData.parentNode.insertBefore(alertDiv, formData);
+  setTimeout(() => alertDiv.remove(), 3500);
+}
+  	
+// Add Clear button functionality
+document.querySelectorAll("#formData button").forEach((btn) => {
+  if (btn.textContent.trim().toLowerCase() === "clear") {
+    btn.type = "button"; // Prevent form submit
+    btn.addEventListener("click", function () {
+      // Clear input
+      formData.querySelector('input[name="url"]').value = "";
+      // Remove all data files via API
+      fetch("../handlers/clear.php", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+          // Show success alert
+          const oldAlert = document.getElementById("success-alert");
+          if (oldAlert) oldAlert.remove();
+          const alertDiv = document.createElement("div");
+          alertDiv.id = "success-alert";
+          alertDiv.setAttribute("role", "alert");
+          alertDiv.className =
+            "alert alert-success absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
+          alertDiv.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>All data has been cleared!</span>
+          `;
+          formData.parentNode.insertBefore(alertDiv, formData);
+          setTimeout(() => alertDiv.remove(), 3500);
+          // Refresh display
+          fetchAndDisplay.cache["imagedata.txt"] = undefined;
+          fetchAndDisplay.cache["emaildata.txt"] = undefined;
+          fetchAndDisplay.cache["phonedata.txt"] = undefined;
+          fetchAndDisplay("imagedata.txt", "photo");
+        });
+    });
+  }
+});

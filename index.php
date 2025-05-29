@@ -12,9 +12,9 @@
 </head>
 
 <body class="">
-    <div class="w-[90%] border border-white m-auto select-none p-[100px_0px]">
-        <div class="w-[50%] m-auto">
-            <h1 class="text-center text-white text-[2.5em] md:font-bold font-extrabold pb-[50px]">Extract URL for Get Email, PhoneNumber and Images Not Duplicate.</h1>
+    <div class="md:w-[90%] border border-white m-auto select-none p-[100px_0px_10px_0px]">
+        <div class="md:w-[70%] w-full p-5 md:p-0 m-auto">
+            <h1 class="text-center text-white text-[2.5em] md:font-bold font-extrabold pb-[50px]">Extract URL For Get Email, PhoneNumber and Images Not Duplicate.</h1>
             <form id="formData" class="flex w-full md:gap-0 gap-[30px] flex-wrap md:justify-between justify-center items-center ">
                 <div class="relative md:w-[70%]  w-[100%]">
                     <div class=" border border-white bg-black justify-center shadow-sm flex items-center overflow-hidden">
@@ -32,11 +32,15 @@
                     <span>Extract</span>
                     <i class="fa-solid absolute right-5 fa-arrow-right border duration-[0.5s] rounded-full p-[10px]"></i>
                 </button>
+                <button type="submit" class="btn border border-white relative text-white h-[50px] md:w-[18%] w-[50%]">
+                    <span>Clear</span>
+                    <i class="fa-solid absolute right-5 fa-arrow-right border duration-[0.5s] rounded-full p-[10px]"></i>
+                </button>
             </form>
         </div>
     </div>
     <!-- Display from File -->
-    <section class="md:w-[90%] w-[95%] m-auto">
+    <section class="md:w-[90%]  m-auto">
         <div class="w-full justify-center flex items-center">
             <button type="button" class="btn-Show" id="showPhoto">
                 <h1> All Photo</h1>
@@ -48,7 +52,7 @@
                 <h1>All Phone Number</h1>
             </button>
         </div>
-        <div id="displayData" class="mt-8 border pb-[50px] mb-[100px] rounded flex justify-center items-center flex-wrap"></div>
+        <div id="displayData" class="mt-8 md:border pb-[50px] mb-[100px] rounded flex justify-center items-center flex-wrap"></div>
     </section>
 </body>
 <!--  JS  -->

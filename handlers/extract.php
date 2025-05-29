@@ -36,9 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         exit;
     }
 
-    $html = file_get_contents($url);
+    $html = @file_get_contents($url);
     if ($html === false) {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to fetch content']);
+        // If blocked (e.g., cannot fetch), return blocked status
+        echo json_encode(['status' => 'blocked', 'message' => 'Link is Blocked !']);
         exit;
     }
 

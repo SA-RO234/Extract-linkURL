@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @plugin "daisyui";
+* {
+  @apply select-none;
+}
 .btn {
   @apply cursor-pointer;
   @apply bg-black;
