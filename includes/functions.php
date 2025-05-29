@@ -9,8 +9,25 @@ function extractData($content)
 }
 function extractEmails($content)
 {
-    preg_match_all("/[a-z0-9.\-_]+@[a-z0-9\-]+\.[a-z]{2,6}/i", $content, $matches);
-    return $matches[0];
+    $emails = [];
+    // Match all emails with username, @, and domain (including .kh and any TLD, and allow subdomains)
+    preg_match_all(
+        '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(?:[a-zA-Z]{2,}|kh)(?:\.[a-zA-Z]{2,})*/i',
+        $content,
+        $matches1
+    );
+    foreach ($matches1[0] as $email) {
+        // Exclude emails with consecutive dots, only one @, and valid domain
+        if (
+            !preg_match('/\.\./', $email) && // no consecutive dots
+            !preg_match('/@.*@/', $email) && // only one @
+            preg_match('/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/', $email) // must have username, @, and valid domain
+        ) {
+            $emails[] = $email;
+        }
+    }
+    // Remove duplicates and always return array
+    return array_unique($emails) ?: [];
 }
 
 
@@ -33,20 +50,24 @@ function extractImages($content)
     $allUrls = array_merge($matches[1] ?? [], $matches[2] ?? [], $matches[3] ?? []);
     foreach ($allUrls as $url) {
         if ($url && (
-            preg_match('/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i', $url) ||
-            preg_match('/([?&](format|type|ext)=(jpg|jpeg|png|webp|gif|svg))/i', $url)
+            preg_match('/^https:\/\//i', $url) &&
+            (
+                preg_match('/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i', $url) ||
+                preg_match('/([?&](format|type|ext)=(jpg|jpeg|png|webp|gif|svg))/i', $url)
+            )
         )) {
             $imageUrls[$url] = true;
         }
     }
-    // Also match direct image URLs in plain text (absolute and relative)
-    preg_match_all('/((https?:\/\/|\/)[^\s"\'<>]+(?:(?:\.(jpg|jpeg|png|webp|gif|svg))|(?:[?&](?:format|type|ext)=(?:jpg|jpeg|png|webp|gif|svg)))(\?[^\s"\'<>]*)?)/i', $content, $plainMatches);
-    foreach ($plainMatches[1] ?? [] as $url) {
+    // Also match direct image URLs in plain text (absolute only, must start with https:)
+    preg_match_all('/(https:\/\/[^"]+?(?:\.(jpg|jpeg|png|webp|gif|svg)|[?&](?:format|type|ext)=(?:jpg|jpeg|png|webp|gif|svg))[^\s"\'<>]*)/i', $content, $plainMatches);
+    foreach (($plainMatches[1] ?? []) as $url) {
         if ($url) {
             $imageUrls[$url] = true;
         }
     }
-    return array_keys($imageUrls);
+    // Always return an array
+    return array_keys($imageUrls) ?: [];
 }
 
 function saveData($data)
