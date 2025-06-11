@@ -72,22 +72,24 @@ function extractImages($content)
 
 function saveData($data)
 {
+    // Helper to append unique lines efficiently
     function appendUnique($file, $lines)
     {
+        if (empty($lines)) return;
         $existing = file_exists($file) ? file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
         $existing = array_map('trim', $existing);
         $toAdd = array_diff($lines, $existing);
         if (!empty($toAdd)) {
-            file_put_contents($file, implode(PHP_EOL, $toAdd) . PHP_EOL, FILE_APPEND);
+            file_put_contents($file, implode(PHP_EOL, $toAdd) . PHP_EOL, FILE_APPEND | LOCK_EX);
         }
     }
 
-    // Clean image URLs before saving
-    $cleanImages = array_map(function ($url) {
-        return rtrim($url, ';)');
-    }, $data['images']);
+    // Clean and deduplicate
+    $cleanImages = array_unique(array_map(fn($url) => rtrim($url, ';)'), $data['images']));
+    $cleanEmails = array_unique($data['emails']);
+    $cleanPhones = array_unique($data['phones']);
 
-    appendUnique(STORAGE_PATH . 'emaildata.txt', $data['emails']);
+    appendUnique(STORAGE_PATH . 'emaildata.txt', $cleanEmails);
     appendUnique(STORAGE_PATH . 'imagedata.txt', $cleanImages);
-    appendUnique(STORAGE_PATH . 'phonedata.txt', $data['phones']);
+    appendUnique(STORAGE_PATH . 'phonedata.txt', $cleanPhones);
 }

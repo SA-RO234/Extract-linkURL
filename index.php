@@ -17,14 +17,11 @@
             <h1 class="text-center text-white text-[2.5em] md:font-bold font-extrabold pb-[50px]">Extract URL For Get Email, PhoneNumber and Images Not Duplicate.</h1>
             <form id="formData" class="flex w-full md:gap-0 gap-[30px] flex-wrap md:justify-between justify-center items-center ">
                 <div class="relative md:w-[70%]  w-[100%]">
-                    <div class=" border border-white bg-black justify-center shadow-sm flex items-center overflow-hidden">
+                    <div class="border border-white bg-black justify-center shadow-sm flex items-center overflow-hidden">
                         <span class="text-gray-400 text-sm pl-4 pr-1 ">http://</span>
                         <input required type="text" name="url" placeholder="site.com" class="w-full bg-transparent py-3 px-0 text-gray-300 placeholder:text-sm outline-none placeholder-gray-400 text-sm">
                         <div class="p-3 text-gray-400 border-s-2 border-white cursor-pointer hover:text-gray-300 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                            </svg>
+                            <!-- SVG icon -->
                         </div>
                     </div>
                 </div>
@@ -32,7 +29,7 @@
                     <span>Extract</span>
                     <i class="fa-solid absolute right-5 fa-arrow-right border duration-[0.5s] rounded-full p-[10px]"></i>
                 </button>
-                <button type="submit" class="btn border border-white relative text-white h-[50px] md:w-[18%] w-[50%]">
+                <button type="button" class="btn border border-white relative text-white h-[50px] md:w-[18%] w-[50%]">
                     <span>Clear</span>
                     <i class="fa-solid absolute right-5 fa-arrow-right border duration-[0.5s] rounded-full p-[10px]"></i>
                 </button>

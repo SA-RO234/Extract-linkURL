@@ -187,34 +187,13 @@ function showBlockedAlert() {
 // Add Clear button functionality
 document.querySelectorAll("#formData button").forEach((btn) => {
   if (btn.textContent.trim().toLowerCase() === "clear") {
-    btn.type = "button"; // Prevent form submit
+    btn.type = "button";
     btn.addEventListener("click", function () {
-      // Clear input
       formData.querySelector('input[name="url"]').value = "";
-      // Remove all data files via API
       fetch("../handlers/clear.php", { method: "POST" })
         .then((res) => res.json())
-        .then((data) => {
-          // Show success alert
-          const oldAlert = document.getElementById("success-alert");
-          if (oldAlert) oldAlert.remove();
-          const alertDiv = document.createElement("div");
-          alertDiv.id = "success-alert";
-          alertDiv.setAttribute("role", "alert");
-          alertDiv.className =
-            "alert alert-success absolute top-[20px] right-[20px] flex items-center gap-2 my-4";
-          alertDiv.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>All data has been cleared!</span>
-          `;
-          formData.parentNode.insertBefore(alertDiv, formData);
-          setTimeout(() => alertDiv.remove(), 3500);
-          // Refresh display
-          fetchAndDisplay.cache["imagedata.txt"] = undefined;
-          fetchAndDisplay.cache["emaildata.txt"] = undefined;
-          fetchAndDisplay.cache["phonedata.txt"] = undefined;
+        .then(() => {
+          fetchAndDisplay.cache = {}; // Clear cache
           fetchAndDisplay("imagedata.txt", "photo");
         });
     });
